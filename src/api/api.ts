@@ -2,30 +2,33 @@ import axios from "axios";
 import { authStorage } from "../storage/authStorage";
 
 export const api = axios.create({
-  baseURL: "http://172.31.217.169:5139/api",
-   headers: {
+  baseURL: "https://autopart-production.up.railway.app/api",
+  headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 15000,
 });
 
-api.interceptors.request.use(async (config) => {
-  const token = await authStorage.getToken();
+api.interceptors.request.use(
+  async (config) => {
+    const token = await authStorage.getToken();
 
-  console.log("API REQUEST:", {
-    method: config.method,
-    baseURL: config.baseURL,
-    url: config.url,
-    fullUrl: `${config.baseURL ?? ""}${config.url ?? ""}`,
-    hasToken: !!token,
-  });
+    console.log("API REQUEST:", {
+      method: config.method,
+      baseURL: config.baseURL,
+      url: config.url,
+      fullUrl: `${config.baseURL ?? ""}${config.url ?? ""}`,
+      hasToken: !!token,
+    });
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
   (response) => {
